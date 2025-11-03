@@ -3,9 +3,9 @@ import Image from "next/image";
 import logo from "@/app/svg/logo.svg";
 const Bottombar = () => {
   return (
-    <SidebarLayout>
+    <BottomBarLayout>
         <Image src={logo} alt="Logo" width={200} height={60} />
-    </SidebarLayout>
+    </BottomBarLayout>
   )
 
 };
@@ -13,8 +13,9 @@ const Bottombar = () => {
 export default Bottombar;
 
 
-const SidebarLayout = styled.div`
-  width : 500px;
+const BottomBarLayout = styled.div`
+  max-width : 500px;
+  width : 90%;
   height : 80px;
   background-color : white;
   border-radius : 20px;

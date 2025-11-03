@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import styled from "@emotion/styled";
 import Bottombar from "./components/bottombar/bottombar";
+import SideModal from "./components/modal/sidemodal";
 import {data} from "./rollerskate_facilities";
 
 declare global {
@@ -140,6 +141,7 @@ export default function Home() {
     <HomeLayout>
       <div id="map" style={{ width: "100%", height: "100%", zIndex: 1 }}></div>
       <Bottombar />
+      <SideModal />
     </HomeLayout>
   );
 }
