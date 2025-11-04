@@ -3,8 +3,10 @@
 import { useEffect, useState } from "react";
 import styled from "@emotion/styled";
 import Bottombar from "./components/bottombar/bottombar";
-import SideModal from "./components/modal/sidemodal";
+import SearchModal from "./components/modal/searchmodal";
+import Location from "./components/bottombar/location";
 import {data} from "./rollerskate_facilities";
+import { useRef } from "react";
 
 declare global {
   interface Window {
@@ -14,9 +16,10 @@ declare global {
 
 export default function Home() {
   const [userLocation, setUserLocation] = useState<{lat: number, lng: number} | null>(null);
+  const [selectedFacility, setSelectedFacility] = useState<{ lat: number; lng: number }| null >(null);
+  const mapRef = useRef<any>(null);
 
   useEffect(() => {
-    // 사용자 위치 가져오기
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -27,7 +30,6 @@ export default function Home() {
         },
         (error) => {
           console.error("위치 정보를 가져올 수 없습니다:", error);
-          // 위치 정보를 가져올 수 없을 때 기본 위치 (서울)
           setUserLocation({
             lat: 37.5665,
             lng: 126.9780
@@ -35,7 +37,6 @@ export default function Home() {
         }
       );
     } else {
-      // Geolocation을 지원하지 않는 경우 기본 위치
       setUserLocation({
         lat: 37.5665,
         lng: 126.9780
@@ -44,7 +45,7 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    if (!userLocation) return; // 위치 정보가 없으면 대기
+    if (!userLocation) return;
 
     const KAKAO_APP_KEY = "ab10b55e22c4a11f942000379e0d8c2c";
 
@@ -135,13 +136,47 @@ export default function Home() {
         infowindow.close();
       });
     });
+    mapRef.current = map;
   };
+
+  useEffect(() => {
+  if (!selectedFacility || !window.kakao || !window.kakao.maps) return;
+
+  const container = document.getElementById("map");
+  if (!container) return;
+
+  // 지도 객체 가져오기
+  const map = new window.kakao.maps.Map(container, {
+    center: new window.kakao.maps.LatLng(selectedFacility.lat, selectedFacility.lng),
+    level: 5,
+  });
+
+  // 선택된 시설 마커 추가
+  const marker = new window.kakao.maps.Marker({
+    position: new window.kakao.maps.LatLng(selectedFacility.lat, selectedFacility.lng),
+    map: map,
+  });
+
+  const infowindow = new window.kakao.maps.InfoWindow({
+    content: `<div style="padding:10px;font-size:12px;color:black;">선택된 시설</div>`,
+  });
+
+  infowindow.open(map, marker);
+}, [selectedFacility]);
+
+  const [open, setOpen] = useState(false);
 
   return (
     <HomeLayout>
       <div id="map" style={{ width: "100%", height: "100%", zIndex: 1 }}></div>
-      <Bottombar />
-      <SideModal />
+      <Bottombar open={open} setOpen={setOpen} />
+      <Location  onClick={() => {
+  if (mapRef.current && userLocation) {
+    const moveLatLng = new window.kakao.maps.LatLng(userLocation.lat, userLocation.lng);
+    mapRef.current.panTo(moveLatLng); // ✅ 현재 위치로 부드럽게 이동
+  }
+}} />
+      {open && (<SearchModal setSelectedFacility={setSelectedFacility}/>)}
     </HomeLayout>
   );
 }
