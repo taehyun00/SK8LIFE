@@ -140,20 +140,15 @@ export default function Home() {
   };
 
   useEffect(() => {
-  if (!selectedFacility || !window.kakao || !window.kakao.maps) return;
+  if (!selectedFacility || !window.kakao || !window.kakao.maps || !mapRef.current) return;
 
-  const container = document.getElementById("map");
-  if (!container) return;
+  const map = mapRef.current;
+  const moveLatLng = new window.kakao.maps.LatLng(selectedFacility.lat, selectedFacility.lng);
+  map.panTo(moveLatLng); // ✅ 기존 지도에서 부드럽게 이동
 
-  // 지도 객체 가져오기
-  const map = new window.kakao.maps.Map(container, {
-    center: new window.kakao.maps.LatLng(selectedFacility.lat, selectedFacility.lng),
-    level: 5,
-  });
-
-  // 선택된 시설 마커 추가
+  // 마커와 인포윈도우 표시
   const marker = new window.kakao.maps.Marker({
-    position: new window.kakao.maps.LatLng(selectedFacility.lat, selectedFacility.lng),
+    position: moveLatLng,
     map: map,
   });
 
@@ -163,6 +158,7 @@ export default function Home() {
 
   infowindow.open(map, marker);
 }, [selectedFacility]);
+
 
   const [open, setOpen] = useState(false);
 
